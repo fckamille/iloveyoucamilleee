@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Groovy Doobee - Vinyl Shop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-up {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(100%); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .animate-slide-in-right {
+            animation: slideInRight 0.5s ease-out forwards;
+        }
+        
+        /* Custom scrollbar for better look */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #f472b6; /* pink-500 */
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background-color: #fce7f6; /* pink-100 */
+        }
+
+        /* Vinyl image styling */
+        .vinyl-image {
+            object-fit: cover;
+            border-radius: 0.5rem; 
+        }
+        
+        /* Artist Square Styling */
+        .artist-square {
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            position: relative; 
+            overflow: hidden; 
+        }
+
+        .artist-square::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.45); 
+            transition: background-color 0.3s;
+            z-index: 1; 
+        }
+
+        .artist-square:hover::before {
+            background-color: rgba(0, 0, 0, 0.2); 
+        }
+
+        .artist-name-text {
+            position: relative; 
+            z-index: 2; 
+            text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        /* Styling for clickable product card */
+        .product-card-button {
+            display: block;
+            width: 100%;
+            text-align: center;
+            padding: 1rem;
+            border-radius: 0.75rem; 
+            border: 1px solid #fbcfe8;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); 
+            background-color: #ffffff; 
+            transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+        }
+        .product-card-button:hover {
+            transform: translateY(-4px); 
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); 
+            background-color: #fce7f6;
+        }
+
+        /* Lazada-style button */
+        .lazada-btn {
+            background-color: #f87171; /* A stronger accent pink/red */
+            color: white;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+        .lazada-btn:hover {
+            background-color: #ef4444; /* darker red */
+            transform: translateY(-1px);
+        }
+
+        /* Profile Section Gradient */
+        .profile-header {
+            background: linear-gradient(to right, #be185d, #ec4899);
+        }
+    </style>
+</head>
+<body class="bg-pink-50 text-pink-900 flex flex-col min-h-screen">
+    <!-- Header -->
+    <header class="bg-pink-700 text-white py-4 px-4 md:px-8 shadow-lg sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <button onclick="changePage('artists')" class="text-2xl md:text-3xl font-bold hover:text-pink-100 transition-colors focus:outline-none">
+                Groovy Doobee
+            </button>
+            
+            <div class="flex items-center space-x-4">
+                <!-- Account Icon Button (NEW) -->
+                <button onclick="changePage('account')" class="p-2 rounded-full hover:bg-pink-600 transition-colors focus:outline-none" title="Account Center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </button>
+
+                <!-- Cart Icon Button -->
+                <button onclick="changePage('cart')" class="relative p-2 rounded-full hover:bg-pink-600 transition-colors focus:outline-none" title="Shopping Cart">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-cart"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.72a2 2 0 0 0 2-1.58L23 6H6"/></svg>
+                    <span id="cart-count" class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
+                        0
+                    </span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-6xl mx-auto px-4 md:px-8 py-8 w-full">
+        <!-- Main Application Container -->
+        <div id="main-app-container">
+            <!-- Pages will be rendered here -->
+        </div>
+
+        <!-- Notification Message Display -->
+        <div id="notification-message-container">
+            <!-- Messages (like "Added to Cart") will be injected here by JavaScript -->
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-pink-100 border-t border-pink-200 py-8 px-4 md:px-8 mt-auto">
+        <div class="max-w-6xl mx-auto text-center">
+            <p class="text-sm text-pink-700">
+                © 2025FracyRights Groovy Doobee. I love you so much Sir Gabriel
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // --- DATA ---
+
+        // Helper function to format price for display
+        const formatPrice = (amount) => {
+            return `₱ ${amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+        };
+
+        const SHIPPING_FEE = 150.00;
+        
+        // Data for artists and vinyl records.
+        const brands = [
+            { 
+                id: 'beabadoobee', 
+                name: 'Beabadoobee', 
+                description: "The Pinay-British indie rock sensation. Explore her nostalgic and raw music on vinyl.",
+                logo: "https://wallpapercat.com/w/full/c/b/b/2273794-2400x1500-desktop-hd-beabadoobee-wallpaper.jpg",
+                products: [
+                    { id: 'beatopia', name: 'Beatopia LP (Pink Vinyl)', price: 2100.00, image: "https://cdn.hmv.com/r/w-960/hmv/files/a0/a0afeb34-23ae-4db6-8216-82ceb000c779.jpg", tracks: ["1. Beatopia Cultsong", "2. 10:36", "3. Sunny Day", "4. See You Soon", "5. The Perfect Pair", "6. Broken CD"] },
+                    { id: 'fake_it_flowers', name: 'Fake It Flowers LP (Orange Vinyl)', price: 2300.00, image: "https://external-preview.redd.it/Mj-psdf-vughGNVoRtGj5hvkf2wQdnddBX5u9Y31JYk.jpg?auto=webp&s=7694beae795c6fe77969a60760cb44c88d9cba4f", tracks: ["1. Care", "2. Dye It Red", "3. Back To Mars", "4. Charlie Brown", "5. Worth It", "6. How Was Your Day?"] },
+                    { id: 'space_cadet', name: 'Space Cadet EP', price: 1800.00, image: "https://f4.bcbits.com/img/0028540460_10.jpg", tracks: ["1. Space Cadet", "2. I Wish I Was Stephen Malkmus", "3. Sun", "4. Talk"] }
+                ]
+            },
+            { 
+                id: 'taylor_swift', 
+                name: 'Taylor Swift', 
+                description: "The queen of pop and country. Find limited editions of her iconic albums on vinyl.",
+                logo: "https://tse1.explicit.bing.net/th/id/OIP.bDK-1HHBaME1FT7BRN6qyQAAAA?rs=1&pid=ImgDetMain&o=7&rm=3",
+                products: [
+                    { id: '1989', name: '1989 (Taylor\'s Version) Vinyl', price: 2500.00, image: "image_4d8dc7.png", tracks: ["1. Welcome to New York (TV)", "2. Blank Space (TV)", "3. Style (TV)", "4. Bad Blood (TV)", "5. Wildest Dreams (TV)", "6. Shake It Off (TV)"] },
+                    { id: 'midnights', name: 'Midnights Moonstone Blue Edition Vinyl', price: 2800.00, image: "image_4ca50b.jpg", tracks: ["1. Lavender Haze", "2. Maroon", "3. Anti-Hero", "4. Snow On The Beach", "5. You're On Your Own, Kid", "6. Midnight Rain"] },
+                    { id: 'folklore', name: 'Folklore (Beige) Double LP', price: 2650.00, image: "https://upload.wikimedia.org/wikipedia/en/f/f3/Taylor_Swift_-_Folklore.png", tracks: ["1. the 1", "2. cardigan", "3. the last great american dynasty", "4. exile", "5. my tears ricochet", "6. mirrorball"] }
+                ]
+            },
+            { 
+                id: 'the_1975', 
+                name: 'The 1975', 
+                description: "The innovative UK band blurring the lines between pop, rock, and electronic music.",
+                logo: "https://storage.googleapis.com/afs-prod/media/e06d568c8b9b4746b8f9b5fccfee2667/1050.jpeg",
+                products: [
+                    { id: 'brief_inquiry', name: 'A Brief Inquiry LP', price: 2700.00, image: "image_4d9189.png", tracks: ["1. The 1975", "2. Give Yourself a Try", "3. TOOTIMETOOTIMETOOTIME", "4. How to Draw / Petrichor", "5. Love It If We Made It", "6. Be My Mistake"] },
+                    { id: 'ilikewhen', name: 'I Like It When You Sleep LP', price: 2900.00, image: "image_4d94d5.png", tracks: ["1. The 1975", "2. Love Me", "3. UGH!", "4. A Change of Heart", "5. She's American", "6. If I Believe You"] },
+                    { id: 'self_titled', name: 'The 1975 (Self-Titled) LP', price: 2600.00, image: "https://upload.wikimedia.org/wikipedia/en/d/d0/The_1975_-_Being_Funny_in_a_Foreign_Language.png", tracks: ["1. The 1975", "2. Happiness", "3. Looking for Somebody (To Love)", "4. Part of the Band", "5. Oh Caroline", "6. I'm in Love with You"] }
+                ]
+            },
+            { 
+                id: 'lizzy_mcalpine', 
+                name: 'Lizzy McAlpine', 
+                description: "Introspective songwriting and viral folk-pop hits from the Pennsylvania native.",
+                logo: "https://www.nme.com/wp-content/uploads/2023/04/Chicago-Show-03-696x442.jpg",
+                products: [
+                    { id: 'five_seconds_flat', name: 'five seconds flat LP', price: 2400.00, image: "image_ffed0e.jpg", tracks: ["1. doomsday", "2. an ego thing", "3. erase me", "4. called you again", "5. all my ghosts", "6. reckless driving"] },
+                    { id: 'older', name: 'Older LP (New Release)', price: 2800.00, image: "image_ff78d2.png", tracks: ["1. The Elevator", "2. Come Down Soon", "3. Like It Tastes", "4. Older", "5. Drunk, Running", "6. Broken Glass"] },
+                    { id: 'give_me_a_minute', name: 'Give Me A Minute LP', price: 2200.00, image: "https://f4.bcbits.com/img/a0447171439_10.jpg", tracks: ["1. Give Me A Minute", "2. Nothing/Sadie", "3. To the Mountains", "4. Apple Pie", "5. Same Boat", "6. Over-the-moon"] }
+                ]
+            },
+            { 
+                id: 'clairo', 
+                name: 'Clairo', 
+                description: "The face of lo-fi and indie bedroom pop. Her sound is gentle, yet deeply textured.",
+                logo: "https://i.pinimg.com/originals/45/b3/fc/45b3fc12ed4cf1f1873de48371b7c5c4.jpg",
+                products: [
+                    { id: 'sling', name: 'Sling LP (Standard Black)', price: 2500.00, image: "image_4d990f.png", tracks: ["1. Bambi", "2. Amoeba", "3. Partridge", "4. Zinnias", "5. Blouse", "6. Wade"] },
+                    { id: 'immunity', name: 'Immunity LP (Blue Vinyl)', price: 2650.00, image: "image_4d9850.png", tracks: ["1. Alewife", "2. Impossible", "3. Closer to You", "4. North", "5. Bags", "6. Softly"] },
+                    { id: 'diary001', name: 'Diary 001 EP', price: 1900.00, image: "https://f4.bcbits.com/img/0014792610_10.jpg", tracks: ["1. Hello?", "2. Flaming Hot Cheetos", "3. B.O.M.D.", "4. 4EVER", "5. Pretty Girl", "6. How"] }
+                ]
+            },
+            { 
+                id: 'the_marias', 
+                name: 'The Marías', 
+                description: "Smooth, dreamy, and bilingual pop. Relax to their sensual and jazz-infused sound.", 
+                logo: "https://s1.ticketm.net/dam/a/667/c68e18ef-e5a4-4154-a02f-278e939a7667_TABLET_LANDSCAPE_LARGE_16_9.jpg",
+                products: [
+                    { id: 'cinema', name: 'CINEMA LP (Clear Vinyl)', price: 2800.00, image: "image_00614a.png", tracks: ["1. Just a Feeling", "2. Calling U Back", "3. Hush", "4. All I Really Want Is You", "5. Hablemos", "6. Little by Little"] },
+                    { id: 'submarine', name: 'Submarine LP (Yellow Vinyl)', price: 2600.00, image: "image_000eba.png", tracks: ["1. Ride", "2. Hamptons", "3. Echo", "4. Run Your Mouth", "5. Real Life", "6. Blur"] },
+                    { id: 'superclean', name: 'Superclean, Vol. I & II LP', price: 3100.00, image: "https://f4.bcbits.com/img/a2185803248_10.jpg", tracks: ["1. I Don't Know You", "2. Basta Ya", "3. Ruthless", "4. Cariñito", "5. ABQ", "6. Loverboy"] }
+                ]
+            },
+            { 
+                id: 'blackpink', 
+                name: 'BLACKPINK', 
+                description: "The biggest girl group in the world. Get your limited edition K-Pop vinyl now.",
+                logo: "https://i.pinimg.com/736x/87/18/84/8718840c5f59048a1c6e11894d07018d.jpg",
+                products: [
+                    { id: 'the_album', name: 'THE ALBUM LP (Pink Vinyl)', price: 3500.00, image: "https://shop.blackpinkmusic.com/cdn/shop/files/blackpink-the-album-pink-vinyl-2.jpg", tracks: ["1. How You Like That", "2. Ice Cream", "3. Pretty Savage", "4. Bet You Wanna", "5. Lovesick Girls", "6. Crazy Over You"] },
+                    { id: 'born_pink', name: 'BORN PINK LP (Black Vinyl)', price: 3200.00, image: "https://s3.eu-west-1.amazonaws.com/media.store-jp.nintendo.com/item/10000/77501_1.jpg", tracks: ["1. Pink Venom", "2. Shut Down", "3. Typa Girl", "4. Yeah Yeah Yeah", "5. Hard to Love", "6. The Happiest Girl"] },
+                    { id: 'square_up', name: 'Square Up Mini Album (Red Vinyl)', price: 2900.00, image: "https://m.media-amazon.com/images/I/7161m-iV82L._UF894,1000_QL80_.jpg", tracks: ["1. Ddu-Du Ddu-Du", "2. Forever Young", "3. Really", "4. See U Later"] }
+                ]
+            },
+            { 
+                id: 'phoebe_bridgers', 
+                name: 'Phoebe Bridgers', 
+                description: "Emotive, melancholic folk-rock from the highly acclaimed singer-songwriter.",
+                logo: "https://placehold.co/500x500/808080/ffffff?text=Phoebe+Bridgers",
+                products: [
+                    { id: 'stranger_in_alps', name: 'Stranger in the Alps LP', price: 2400.00, image: "https://placehold.co/256x256/fce7f6/be185d?text=Alps+LP", tracks: ["1. Smoke Signals", "2. Motion Sickness", "3. Funeral", "4. Demi Moore", "5. Scott Street", "6. Killer"] },
+                    { id: 'punisher', name: 'Punisher LP (Blue/Swirly)', price: 2700.00, image: "https://placehold.co/256x256/fce7f6/be185d?text=Punisher+LP", tracks: ["1. DVD Menu", "2. Garden Song", "3. Kyoto", "4. Punisher", "5. Halloween", "6. Chinese Satellite"] },
+                    { id: 'boygenius', name: 'the record (Boygenius) LP', price: 2800.00, image: "https://placehold.co/256x256/fce7f6/be185d?text=Boygenius+LP", tracks: ["1. Without You Without Them", "2. $20", "3. Emily I'm Sorry", "4. True Blue", "5. Cool About It", "6. Not Strong Enough"] }
+                ]
+            }
+        ];
+
+        // --- GLOBAL STATE ---
+        let state = {
+            currentPage: 'artists', 
+            selectedArtistId: null,
+            selectedProductId: null,
+            cart: [], 
+            checkoutDetails: { name: '', address: '', contact: '' },
+            user: {
+                name: 'Sir Gabriel',
+                email: 'gabriel@groovy.com',
+                memberSince: '2023',
+                tier: 'Platinum Member'
+            }
+        };
+
+        // --- UTILITY FUNCTIONS ---
+
+        const showNotification = (message) => {
+            const container = document.getElementById('notification-message-container');
+            container.innerHTML = `
+                <div class="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-full shadow-lg transition-all duration-500 animate-slide-in-right z-50">
+                    ${message}
+                </div>
+            `;
+            setTimeout(() => {
+                container.innerHTML = '';
+            }, 3000);
+        };
+
+        const updateCartCount = () => {
+            const count = state.cart.reduce((total, item) => total + item.quantity, 0);
+            document.getElementById('cart-count').textContent = count;
+            return count;
+        };
+
+        const findProduct = (artistId, productId) => {
+            const artist = brands.find(b => b.id === artistId);
+            if (!artist) return null;
+            return artist.products.find(p => p.id === productId);
+        };
+
+        const findCartIndex = (artistId, productId) => {
+            return state.cart.findIndex(item => item.artistId === artistId && item.productId === productId);
+        }
+
+        // --- CART LOGIC ---
+
+        window.addToCart = (artistId, productId, productName, productPrice) => {
+            const existingIndex = findCartIndex(artistId, productId);
+            if (existingIndex > -1) {
+                state.cart[existingIndex].quantity += 1;
+            } else {
+                state.cart.push({ artistId, productId, name: productName, price: productPrice, quantity: 1 });
+            }
+            updateCartCount();
+            showNotification(`${productName} added to cart!`);
+            // We do not change page here, the original code had changePage('cart') which instantly switches the view,
+            // which is usually undesirable after adding an item. We'll rely on the notification.
+        };
+
+        window.updateCartQuantity = (artistId, productId, newQuantity) => {
+            const index = findCartIndex(artistId, productId);
+            if (index > -1) {
+                const quantity = parseInt(newQuantity, 10);
+                if (quantity > 0) state.cart[index].quantity = quantity;
+                else state.cart.splice(index, 1);
+                updateCartCount();
+                renderCartPage(); 
+            }
+        };
+
+        window.removeItemFromCart = (artistId, productId) => {
+            const index = findCartIndex(artistId, productId);
+            if (index > -1) {
+                state.cart.splice(index, 1);
+                updateCartCount();
+                renderCartPage();
+            }
+        };
+
+        // --- CHECKOUT LOGIC (FIXED: Added placeOrder function) ---
+
+        window.placeOrder = () => {
+            const nameInput = document.getElementById('name');
+            const addressInput = document.getElementById('address');
+            const contactInput = document.getElementById('contact');
+
+            if (!nameInput.value || !addressInput.value || !contactInput.value) {
+                // In a real app, this would use a custom modal/notification
+                alert("Please fill out all delivery details (Full Name, Address, Contact Number) before placing the order.");
+                return;
+            }
+
+            // Save details to state
+            state.checkoutDetails = {
+                name: nameInput.value,
+                address: addressInput.value,
+                contact:
